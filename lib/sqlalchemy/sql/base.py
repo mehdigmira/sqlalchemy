@@ -42,6 +42,8 @@ from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
 
+from typing_extensions import Unpack
+
 from . import roles
 from . import visitors
 from .cache_key import HasCacheKey  # noqa
@@ -1066,7 +1068,7 @@ class Executable(roles.StatementRole):
             connection: Connection,
             distilled_params: _CoreMultiExecuteParams,
             execution_options: CoreExecuteOptionsParameter,
-        ) -> CursorResult[Any]:
+        ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
             ...
 
         def _execute_on_scalar(

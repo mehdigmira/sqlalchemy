@@ -31,14 +31,16 @@ from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
 
+from typing_extensions import Unpack
+
 from .. import util
 from ..event import EventTarget
 from ..pool import Pool
 from ..pool import PoolProxiedConnection
-from ..sql.compiler import Compiled as Compiled
 from ..sql.compiler import Compiled  # noqa
-from ..sql.compiler import TypeCompiler as TypeCompiler
+from ..sql.compiler import Compiled as Compiled
 from ..sql.compiler import TypeCompiler  # noqa
+from ..sql.compiler import TypeCompiler as TypeCompiler
 from ..util import immutabledict
 from ..util.concurrency import await_only
 from ..util.typing import Literal
@@ -3056,7 +3058,7 @@ class ExecutionContext:
     def _get_cache_stats(self) -> str:
         raise NotImplementedError()
 
-    def _setup_result_proxy(self) -> CursorResult[Any]:
+    def _setup_result_proxy(self) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         raise NotImplementedError()
 
     def fire_sequence(self, seq: Sequence_SchemaItem, type_: Integer) -> int:

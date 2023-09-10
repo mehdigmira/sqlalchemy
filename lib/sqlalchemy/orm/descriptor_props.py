@@ -31,6 +31,8 @@ from typing import TypeVar
 from typing import Union
 import weakref
 
+from typing_extensions import Unpack
+
 from . import attributes
 from . import util as orm_util
 from .base import _DeclarativeMapped
@@ -714,10 +716,10 @@ class CompositeProperty(
         def create_row_processor(
             self,
             query: Select[Any],
-            procs: Sequence[Callable[[Row[Any]], Any]],
+            procs: Sequence[Callable[[Row[Unpack[Tuple[Any, ...]]]], Any]],
             labels: Sequence[str],
-        ) -> Callable[[Row[Any]], Any]:
-            def proc(row: Row[Any]) -> Any:
+        ) -> Callable[[Row[Unpack[Tuple[Any, ...]]]], Any]:
+            def proc(row: Row[Unpack[Tuple[Any, ...]]]) -> Any:
                 return self.property.composite_class(
                     *[proc(row) for proc in procs]
                 )

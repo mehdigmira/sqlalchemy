@@ -32,6 +32,8 @@ from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
 
+from typing_extensions import Unpack
+
 from . import coercions
 from . import operators
 from . import roles
@@ -588,7 +590,9 @@ class _repr_row(_repr_base):
 
     __slots__ = ("row",)
 
-    def __init__(self, row: Row[Any], max_chars: int = 300):
+    def __init__(
+        self, row: Row[Unpack[Tuple[Any, ...]]], max_chars: int = 300
+    ):
         self.row = row
         self.max_chars = max_chars
 

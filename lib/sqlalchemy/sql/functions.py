@@ -25,6 +25,8 @@ from typing import Type
 from typing import TYPE_CHECKING
 from typing import TypeVar
 
+from typing_extensions import Unpack
+
 from . import annotation
 from . import coercions
 from . import operators
@@ -59,7 +61,6 @@ from .sqltypes import TableValueType
 from .type_api import TypeEngine
 from .visitors import InternalTraversal
 from .. import util
-
 
 if TYPE_CHECKING:
     from ._typing import _TypeEngineArgument
@@ -179,7 +180,7 @@ class FunctionElement(Executable, ColumnElement[_T], FromClause, Generative):
         connection: Connection,
         distilled_params: _CoreMultiExecuteParams,
         execution_options: CoreExecuteOptionsParameter,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         return connection._execute_function(
             self, distilled_params, execution_options
         )

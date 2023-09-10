@@ -14,7 +14,7 @@ specifically outside of the flush() process.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Tuple, Unpack
 from typing import cast
 from typing import Dict
 from typing import Iterable
@@ -95,7 +95,7 @@ def _bulk_insert(
     render_nulls: bool,
     use_orm_insert_stmt: Optional[dml.Insert] = ...,
     execution_options: Optional[OrmExecuteOptionsParameter] = ...,
-) -> cursor.CursorResult[Any]:
+) -> cursor.CursorResult[Unpack[Tuple[Any, ...]]]:
     ...
 
 
@@ -108,7 +108,7 @@ def _bulk_insert(
     render_nulls: bool,
     use_orm_insert_stmt: Optional[dml.Insert] = None,
     execution_options: Optional[OrmExecuteOptionsParameter] = None,
-) -> Optional[cursor.CursorResult[Any]]:
+) -> Optional[cursor.CursorResult[Unpack[Tuple[Any, ...]]]]:
     base_mapper = mapper.base_mapper
 
     if session_transaction.session.connection_callable:
@@ -129,7 +129,9 @@ def _bulk_insert(
 
     connection = session_transaction.connection(base_mapper)
 
-    return_result: Optional[cursor.CursorResult[Any]] = None
+    return_result: Optional[
+        cursor.CursorResult[Unpack[Tuple[Any, ...]]]
+    ] = None
 
     mappers_to_run = [
         (table, mp)

@@ -21,6 +21,8 @@ from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
 
+from typing_extensions import Unpack
+
 from .session import _AS
 from .session import async_sessionmaker
 from .session import AsyncSession
@@ -566,7 +568,7 @@ class async_scoped_session(Generic[_AS]):
         bind_arguments: Optional[_BindArguments] = None,
         _parent_execute_state: Optional[Any] = None,
         _add_event: Optional[Any] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         ...
 
     @overload
@@ -1524,7 +1526,7 @@ class async_scoped_session(Generic[_AS]):
         ident: Union[Any, Tuple[Any, ...]] = None,
         *,
         instance: Optional[Any] = None,
-        row: Optional[Union[Row[Any], RowMapping]] = None,
+        row: Optional[Union[Row[Unpack[Tuple[Any, ...]]], RowMapping]] = None,
         identity_token: Optional[Any] = None,
     ) -> _IdentityKeyType[Any]:
         r"""Return an identity key.

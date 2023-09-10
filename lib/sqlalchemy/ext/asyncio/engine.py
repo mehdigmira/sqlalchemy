@@ -22,6 +22,8 @@ from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
 
+from typing_extensions import Unpack
+
 from . import exc as async_exc
 from .base import asyncstartablecontext
 from .base import GeneratorStartableContext
@@ -493,7 +495,7 @@ class AsyncConnection(
         statement: str,
         parameters: Optional[_DBAPIAnyExecuteParams] = None,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         r"""Executes a driver-level SQL string and return buffered
         :class:`_engine.Result`.
 
@@ -608,7 +610,7 @@ class AsyncConnection(
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         ...
 
     async def execute(
@@ -617,7 +619,7 @@ class AsyncConnection(
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         r"""Executes a SQL statement construct and return a buffered
         :class:`_engine.Result`.
 

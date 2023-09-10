@@ -22,6 +22,8 @@ from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
 
+from typing_extensions import Unpack
+
 from .session import _S
 from .session import Session
 from .. import exc as sa_exc
@@ -41,7 +43,6 @@ if TYPE_CHECKING:
     from .interfaces import ORMOption
     from .mapper import Mapper
     from .query import Query
-    from .query import RowReturningQuery
     from .session import _BindArguments
     from .session import _EntityBindKey
     from .session import _PKIdentityArgument
@@ -651,7 +652,7 @@ class scoped_session(Generic[_S]):
         bind_arguments: Optional[_BindArguments] = None,
         _parent_execute_state: Optional[Any] = None,
         _add_event: Optional[Any] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         ...
 
     @overload
@@ -1486,7 +1487,7 @@ class scoped_session(Generic[_S]):
     @overload
     def query(
         self, _colexpr: TypedColumnsClauseRole[_T]
-    ) -> RowReturningQuery[Tuple[_T]]:
+    ) -> Query[Row[Tuple[_T]]]:
         ...
 
     # START OVERLOADED FUNCTIONS self.query RowReturningQuery 2-8
@@ -1497,13 +1498,13 @@ class scoped_session(Generic[_S]):
     @overload
     def query(
         self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1]
-    ) -> RowReturningQuery[Tuple[_T0, _T1]]:
+    ) -> Query[Row[Tuple[_T0, _T1]]]:
         ...
 
     @overload
     def query(
         self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], __ent2: _TCCA[_T2]
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2]]:
+    ) -> Query[Row[Tuple[_T0, _T1, _T2]]]:
         ...
 
     @overload
@@ -1513,7 +1514,7 @@ class scoped_session(Generic[_S]):
         __ent1: _TCCA[_T1],
         __ent2: _TCCA[_T2],
         __ent3: _TCCA[_T3],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3]]:
+    ) -> Query[Row[Tuple[_T0, _T1, _T2, _T3]]]:
         ...
 
     @overload
@@ -1524,7 +1525,7 @@ class scoped_session(Generic[_S]):
         __ent2: _TCCA[_T2],
         __ent3: _TCCA[_T3],
         __ent4: _TCCA[_T4],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3, _T4]]:
+    ) -> Query[Row[Tuple[_T0, _T1, _T2, _T3, _T4]]]:
         ...
 
     @overload
@@ -1536,7 +1537,7 @@ class scoped_session(Generic[_S]):
         __ent3: _TCCA[_T3],
         __ent4: _TCCA[_T4],
         __ent5: _TCCA[_T5],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]:
+    ) -> Query[Row[Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]]:
         ...
 
     @overload
@@ -1549,7 +1550,7 @@ class scoped_session(Generic[_S]):
         __ent4: _TCCA[_T4],
         __ent5: _TCCA[_T5],
         __ent6: _TCCA[_T6],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]:
+    ) -> Query[Row[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]]:
         ...
 
     @overload
@@ -1563,7 +1564,7 @@ class scoped_session(Generic[_S]):
         __ent5: _TCCA[_T5],
         __ent6: _TCCA[_T6],
         __ent7: _TCCA[_T7],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]:
+    ) -> Query[Row[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]]:
         ...
 
     # END OVERLOADED FUNCTIONS self.query
@@ -2059,7 +2060,7 @@ class scoped_session(Generic[_S]):
         ident: Union[Any, Tuple[Any, ...]] = None,
         *,
         instance: Optional[Any] = None,
-        row: Optional[Union[Row[Any], RowMapping]] = None,
+        row: Optional[Union[Row[Unpack[Tuple[Any, ...]]], RowMapping]] = None,
         identity_token: Optional[Any] = None,
     ) -> _IdentityKeyType[Any]:
         r"""Return an identity key.

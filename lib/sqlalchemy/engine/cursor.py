@@ -28,8 +28,10 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import TYPE_CHECKING
-from typing import TypeVar
 from typing import Union
+
+from typing_extensions import TypeVarTuple
+from typing_extensions import Unpack
 
 from .result import IteratorResult
 from .result import MergedResult
@@ -54,7 +56,6 @@ from ..util import compat
 from ..util.typing import Literal
 from ..util.typing import Self
 
-
 if typing.TYPE_CHECKING:
     from .base import Connection
     from .default import DefaultExecutionContext
@@ -71,7 +72,7 @@ if typing.TYPE_CHECKING:
     from ..sql.type_api import _ResultProcessorType
 
 
-_T = TypeVar("_T", bound=Any)
+_TP = TypeVarTuple("_TP")
 
 
 # metadata entry tuple indexes.
@@ -344,7 +345,7 @@ class CursorResultMetaData(ResultMetaData):
 
     def __init__(
         self,
-        parent: CursorResult[Any],
+        parent: CursorResult[Unpack[Tuple[Any, ...]]],
         cursor_description: _DBAPICursorDescription,
     ):
         context = parent.context
@@ -928,18 +929,22 @@ class ResultFetchStrategy:
     alternate_cursor_description: Optional[_DBAPICursorDescription] = None
 
     def soft_close(
-        self, result: CursorResult[Any], dbapi_cursor: Optional[DBAPICursor]
+        self,
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
+        dbapi_cursor: Optional[DBAPICursor],
     ) -> None:
         raise NotImplementedError()
 
     def hard_close(
-        self, result: CursorResult[Any], dbapi_cursor: Optional[DBAPICursor]
+        self,
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
+        dbapi_cursor: Optional[DBAPICursor],
     ) -> None:
         raise NotImplementedError()
 
     def yield_per(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: Optional[DBAPICursor],
         num: int,
     ) -> None:
@@ -947,7 +952,7 @@ class ResultFetchStrategy:
 
     def fetchone(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: DBAPICursor,
         hard_close: bool = False,
     ) -> Any:
@@ -955,7 +960,7 @@ class ResultFetchStrategy:
 
     def fetchmany(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: DBAPICursor,
         size: Optional[int] = None,
     ) -> Any:
@@ -963,14 +968,14 @@ class ResultFetchStrategy:
 
     def fetchall(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: DBAPICursor,
     ) -> Any:
         raise NotImplementedError()
 
     def handle_exception(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: Optional[DBAPICursor],
         err: BaseException,
     ) -> NoReturn:
@@ -1062,18 +1067,22 @@ class CursorFetchStrategy(ResultFetchStrategy):
     __slots__ = ()
 
     def soft_close(
-        self, result: CursorResult[Any], dbapi_cursor: Optional[DBAPICursor]
+        self,
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
+        dbapi_cursor: Optional[DBAPICursor],
     ) -> None:
         result.cursor_strategy = _NO_CURSOR_DQL
 
     def hard_close(
-        self, result: CursorResult[Any], dbapi_cursor: Optional[DBAPICursor]
+        self,
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
+        dbapi_cursor: Optional[DBAPICursor],
     ) -> None:
         result.cursor_strategy = _NO_CURSOR_DQL
 
     def handle_exception(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: Optional[DBAPICursor],
         err: BaseException,
     ) -> NoReturn:
@@ -1083,7 +1092,7 @@ class CursorFetchStrategy(ResultFetchStrategy):
 
     def yield_per(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: Optional[DBAPICursor],
         num: int,
     ) -> None:
@@ -1096,7 +1105,7 @@ class CursorFetchStrategy(ResultFetchStrategy):
 
     def fetchone(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: DBAPICursor,
         hard_close: bool = False,
     ) -> Any:
@@ -1110,7 +1119,7 @@ class CursorFetchStrategy(ResultFetchStrategy):
 
     def fetchmany(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: DBAPICursor,
         size: Optional[int] = None,
     ) -> Any:
@@ -1128,7 +1137,7 @@ class CursorFetchStrategy(ResultFetchStrategy):
 
     def fetchall(
         self,
-        result: CursorResult[Any],
+        result: CursorResult[Unpack[Tuple[Any, ...]]],
         dbapi_cursor: DBAPICursor,
     ) -> Any:
         try:
@@ -1375,7 +1384,7 @@ def null_dml_result() -> IteratorResult[Any]:
     return it
 
 
-class CursorResult(Result[_T]):
+class CursorResult(Result[Unpack[_TP]]):
     """A Result that is representing state from a DBAPI cursor.
 
     .. versionchanged:: 1.4  The :class:`.CursorResult``
@@ -2107,12 +2116,14 @@ class CursorResult(Result[_T]):
     def _raw_row_iterator(self):
         return self._fetchiter_impl()
 
-    def merge(self, *others: Result[Any]) -> MergedResult[Any]:
+    def merge(
+        self, *others: Result[Unpack[Tuple[Any, ...]]]
+    ) -> MergedResult[Unpack[_TP]]:
         merged_result = super().merge(*others)
         setup_rowcounts = self.context._has_rowcount
         if setup_rowcounts:
             merged_result.rowcount = sum(
-                cast("CursorResult[Any]", result).rowcount
+                cast("CursorResult[Unpack[Tuple[Any, ...]]]", result).rowcount
                 for result in (self,) + others
             )
         return merged_result

@@ -17,8 +17,8 @@ import collections
 from enum import Enum
 import itertools
 from typing import AbstractSet
-from typing import Any as TODO_Any
 from typing import Any
+from typing import Any as TODO_Any
 from typing import Callable
 from typing import cast
 from typing import Dict
@@ -36,7 +36,9 @@ from typing import Tuple
 from typing import Type
 from typing import TYPE_CHECKING
 from typing import TypeVar
+from typing import TypeVarTuple
 from typing import Union
+from typing import Unpack
 
 from . import cache_key
 from . import coercions
@@ -283,7 +285,7 @@ class ExecutableReturnsRows(Executable, ReturnsRows):
     """base for executable statements that return rows."""
 
 
-class TypedReturnsRows(ExecutableReturnsRows, Generic[_TP]):
+class TypedReturnsRows(ExecutableReturnsRows, Generic[_T]):
     """base for executable statements that return rows."""
 
 

@@ -26,6 +26,8 @@ from typing import TYPE_CHECKING
 from typing import Union
 import weakref
 
+from typing_extensions import Unpack
+
 from . import base
 from . import exc as orm_exc
 from . import interfaces
@@ -93,7 +95,7 @@ class _InstallLoaderCallableProto(Protocol[_O]):
     """
 
     def __call__(
-        self, state: InstanceState[_O], dict_: _InstanceDict, row: Row[Any]
+        self, state: InstanceState[_O], dict_: _InstanceDict, row: Row[Unpack[Tuple[Any, ...]]]
     ) -> None:
         ...
 
@@ -673,7 +675,7 @@ class InstanceState(interfaces.InspectionAttrInfo, Generic[_O]):
             fixed_impl = impl
 
             def _set_callable(
-                state: InstanceState[_O], dict_: _InstanceDict, row: Row[Any]
+                state: InstanceState[_O], dict_: _InstanceDict, row: Row[Unpack[Tuple[Any, ...]]]
             ) -> None:
                 if "callables" not in state.__dict__:
                     state.callables = {}
@@ -685,7 +687,7 @@ class InstanceState(interfaces.InspectionAttrInfo, Generic[_O]):
         else:
 
             def _set_callable(
-                state: InstanceState[_O], dict_: _InstanceDict, row: Row[Any]
+                state: InstanceState[_O], dict_: _InstanceDict, row: Row[Unpack[Tuple[Any, ...]]]
             ) -> None:
                 if "callables" not in state.__dict__:
                     state.callables = {}

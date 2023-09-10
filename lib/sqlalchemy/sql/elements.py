@@ -40,6 +40,8 @@ from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
 
+from typing_extensions import Unpack
+
 from . import coercions
 from . import operators
 from . import roles
@@ -509,7 +511,7 @@ class ClauseElement(
         connection: Connection,
         distilled_params: _CoreMultiExecuteParams,
         execution_options: CoreExecuteOptionsParameter,
-    ) -> Result[Any]:
+    ) -> Result[Unpack[typing_Tuple[Any, ...]]]:
         if self.supports_execution:
             if TYPE_CHECKING:
                 assert isinstance(self, Executable)

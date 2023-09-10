@@ -39,6 +39,8 @@ from typing import TYPE_CHECKING
 from typing import Union
 import weakref
 
+from typing_extensions import Unpack
+
 from . import characteristics
 from . import cursor as _cursor
 from . import interfaces
@@ -1180,7 +1182,7 @@ class DefaultExecutionContext(ExecutionContext):
     result_column_struct: Optional[
         Tuple[List[ResultColumnsEntry], bool, bool, bool, bool]
     ] = None
-    returned_default_rows: Optional[Sequence[Row[Any]]] = None
+    returned_default_rows: Optional[Sequence[Row[Unpack[Tuple[Any, ...]]]]] = None
 
     execution_options: _ExecuteOptions = util.EMPTY_DICT
 
@@ -1895,7 +1897,7 @@ class DefaultExecutionContext(ExecutionContext):
                 0 : -self._num_sentinel_cols
             ]
 
-        result: _cursor.CursorResult[Any] = _cursor.CursorResult(
+        result: _cursor.CursorResult[Unpack[Tuple[Any, ...]]] = _cursor.CursorResult(
             self, strategy, cursor_description
         )
 
