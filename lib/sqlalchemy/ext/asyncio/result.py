@@ -779,7 +779,7 @@ class AsyncMappingResult(_WithKeys, AsyncCommon[RowMapping]):
         return await greenlet_spawn(self._only_one_row, True, True, False)
 
 
-_RT = TypeVar("_RT", bound="Result[Any]")
+_RT = TypeVar("_RT", bound="Result[Unpack[Tuple[Any, ...]]]")
 
 
 async def _ensure_sync_result(result: _RT, calling_method: Any) -> _RT:

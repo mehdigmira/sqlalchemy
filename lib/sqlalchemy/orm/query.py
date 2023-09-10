@@ -291,7 +291,7 @@ class Query(
         ]
 
     @overload
-    def tuples(self: Query[Row[Unpack[_Ts]]]) -> Query[Row[Unpack[_Ts]]]:
+    def tuples(self: Query[Row[Unpack[_Ts]]]) -> Query[Row[Unpack[_Ts]]]:  # type: ignore
         ...
 
     @overload

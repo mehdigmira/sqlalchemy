@@ -538,7 +538,7 @@ class AsyncConnection(
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> AsyncIterator[AsyncResult[Any]]:
+    ) -> AsyncIterator[AsyncResult[Unpack[Tuple[Any, ...]]]]:
         """Execute a statement and return an awaitable yielding a
         :class:`_asyncio.AsyncResult` object.
 
