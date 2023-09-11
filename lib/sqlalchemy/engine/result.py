@@ -1145,13 +1145,11 @@ class Result(_WithKeys, ResultInternal[Row[Unpack[_TP]]]):
         return self._column_slices(col_expressions)
 
     @overload
-    def scalars(self: Result[Tuple[_T]]) -> ScalarResult[_T]:
+    def scalars(self: Result[_T]) -> ScalarResult[_T]:
         ...
 
     @overload
-    def scalars(
-        self: Result[Tuple[_T]], index: Literal[0]
-    ) -> ScalarResult[_T]:
+    def scalars(self: Result[_T], index: Literal[0]) -> ScalarResult[_T]:
         ...
 
     @overload
@@ -1470,7 +1468,7 @@ class Result(_WithKeys, ResultInternal[Row[Unpack[_TP]]]):
         )
 
     @overload
-    def scalar_one(self: Result[Tuple[_T]]) -> _T:
+    def scalar_one(self: Result[_T]) -> _T:
         ...
 
     @overload
@@ -1495,7 +1493,7 @@ class Result(_WithKeys, ResultInternal[Row[Unpack[_TP]]]):
         )
 
     @overload
-    def scalar_one_or_none(self: Result[Tuple[_T]]) -> Optional[_T]:
+    def scalar_one_or_none(self: Result[_T]) -> Optional[_T]:
         ...
 
     @overload
@@ -1553,7 +1551,7 @@ class Result(_WithKeys, ResultInternal[Row[Unpack[_TP]]]):
         )
 
     @overload
-    def scalar(self: Result[Tuple[_T]]) -> Optional[_T]:
+    def scalar(self: Result[_T]) -> Optional[_T]:
         ...
 
     @overload
@@ -1951,7 +1949,7 @@ class TupleResult(FilterResult[_R], util.TypingOnly):
             ...
 
         @overload
-        def scalar_one(self: TupleResult[Tuple[_T]]) -> _T:
+        def scalar_one(self: TupleResult[_T]) -> _T:
             ...
 
         @overload
@@ -1974,7 +1972,7 @@ class TupleResult(FilterResult[_R], util.TypingOnly):
             ...
 
         @overload
-        def scalar_one_or_none(self: TupleResult[Tuple[_T]]) -> Optional[_T]:
+        def scalar_one_or_none(self: TupleResult[_T]) -> Optional[_T]:
             ...
 
         @overload
@@ -1997,7 +1995,7 @@ class TupleResult(FilterResult[_R], util.TypingOnly):
             ...
 
         @overload
-        def scalar(self: TupleResult[Tuple[_T]]) -> Optional[_T]:
+        def scalar(self: TupleResult[_T]) -> Optional[_T]:
             ...
 
         @overload

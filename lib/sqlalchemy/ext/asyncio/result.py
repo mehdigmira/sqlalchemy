@@ -326,7 +326,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[Unpack[_TP]]]):
         return await greenlet_spawn(self._only_one_row, True, False, False)
 
     @overload
-    async def scalar_one(self: AsyncResult[Tuple[_T]]) -> _T:
+    async def scalar_one(self: AsyncResult[_T]) -> _T:
         ...
 
     @overload
@@ -350,7 +350,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[Unpack[_TP]]]):
 
     @overload
     async def scalar_one_or_none(
-        self: AsyncResult[Tuple[_T]],
+        self: AsyncResult[_T],
     ) -> Optional[_T]:
         ...
 
@@ -405,7 +405,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[Unpack[_TP]]]):
         return await greenlet_spawn(self._only_one_row, True, True, False)
 
     @overload
-    async def scalar(self: AsyncResult[Tuple[_T]]) -> Optional[_T]:
+    async def scalar(self: AsyncResult[_T]) -> Optional[_T]:
         ...
 
     @overload
@@ -453,12 +453,12 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[Unpack[_TP]]]):
 
     @overload
     def scalars(
-        self: AsyncResult[Tuple[_T]], index: Literal[0]
+        self: AsyncResult[_T], index: Literal[0]
     ) -> AsyncScalarResult[_T]:
         ...
 
     @overload
-    def scalars(self: AsyncResult[Tuple[_T]]) -> AsyncScalarResult[_T]:
+    def scalars(self: AsyncResult[_T]) -> AsyncScalarResult[_T]:
         ...
 
     @overload

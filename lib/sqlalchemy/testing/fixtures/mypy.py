@@ -79,6 +79,9 @@ class MypyTest(TestBase):
             if use_cachedir is None:
                 use_cachedir = cachedir
             args = [
+                "--no-incremental",
+                "--enable-incomplete-feature=TypeVarTuple",
+                "--enable-incomplete-feature=Unpack",
                 "--strict",
                 "--raise-exceptions",
                 "--cache-dir",

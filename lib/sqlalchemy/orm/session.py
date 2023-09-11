@@ -63,7 +63,7 @@ from .base import state_str
 from .context import FromStatement
 from .context import ORMCompileState
 from .identity import IdentityMap
-from .query import Query
+from .query import Query, RowReturningQuery
 from .state import InstanceState
 from .state_changes import _StateChange
 from .state_changes import _StateChangeState
@@ -2165,7 +2165,7 @@ class Session(_SessionClassMethods, EventTarget):
     @overload
     def execute(
         self,
-        statement: TypedReturnsRows[Tuple[Unpack[_Ts]]],
+        statement: TypedReturnsRows[Unpack[_Ts]],
         params: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
@@ -2274,7 +2274,7 @@ class Session(_SessionClassMethods, EventTarget):
     @overload
     def scalar(
         self,
-        statement: TypedReturnsRows[Tuple[_T]],
+        statement: TypedReturnsRows[_T],
         params: Optional[_CoreSingleExecuteParams] = None,
         *,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
@@ -2324,7 +2324,7 @@ class Session(_SessionClassMethods, EventTarget):
     @overload
     def scalars(
         self,
-        statement: TypedReturnsRows[Tuple[_T]],
+        statement: TypedReturnsRows[_T],
         params: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
@@ -2716,11 +2716,13 @@ class Session(_SessionClassMethods, EventTarget):
         )
 
     @overload
-    def query(self, _entity: _EntityType[_O]) -> Query[_O]:
+    def query(self, _entity: _EntityType[_O],/) -> Query[_O]:
         ...
 
     @overload
-    def query(self, _colexpr: TypedColumnsClauseRole[_T]) -> Query[Row[_T]]:
+    def query(
+        self, _colexpr: TypedColumnsClauseRole[_T],/
+    ) -> RowReturningQuery[_T]:
         ...
 
     # START OVERLOADED FUNCTIONS self.query RowReturningQuery 2-8
@@ -2730,14 +2732,24 @@ class Session(_SessionClassMethods, EventTarget):
 
     @overload
     def query(
-        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1]
-    ) -> Query[Row[_T0, _T1]]:
+        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1],/
+    ) -> RowReturningQuery[_T0, _T1]:
         ...
 
     @overload
     def query(
-        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], __ent2: _TCCA[_T2]
-    ) -> Query[Row[_T0, _T1, _T2]]:
+        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], __ent2: _TCCA[_T2],/
+    ) -> RowReturningQuery[_T0, _T1, _T2]:
+        ...
+
+    @overload
+    def query(
+        self,
+        __ent0: _TCCA[_T0],
+        __ent1: _TCCA[_T1],
+        __ent2: _TCCA[_T2],
+        __ent3: _TCCA[_T3],/
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3]:
         ...
 
     @overload
@@ -2747,7 +2759,8 @@ class Session(_SessionClassMethods, EventTarget):
         __ent1: _TCCA[_T1],
         __ent2: _TCCA[_T2],
         __ent3: _TCCA[_T3],
-    ) -> Query[Row[_T0, _T1, _T2, _T3]]:
+        __ent4: _TCCA[_T4],/
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4]:
         ...
 
     @overload
@@ -2758,7 +2771,8 @@ class Session(_SessionClassMethods, EventTarget):
         __ent2: _TCCA[_T2],
         __ent3: _TCCA[_T3],
         __ent4: _TCCA[_T4],
-    ) -> Query[Row[_T0, _T1, _T2, _T3, _T4]]:
+        __ent5: _TCCA[_T5],/
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4, _T5]:
         ...
 
     @overload
@@ -2770,7 +2784,8 @@ class Session(_SessionClassMethods, EventTarget):
         __ent3: _TCCA[_T3],
         __ent4: _TCCA[_T4],
         __ent5: _TCCA[_T5],
-    ) -> Query[Row[_T0, _T1, _T2, _T3, _T4, _T5]]:
+        __ent6: _TCCA[_T6],/
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4, _T5, _T6]:
         ...
 
     @overload
@@ -2783,7 +2798,8 @@ class Session(_SessionClassMethods, EventTarget):
         __ent4: _TCCA[_T4],
         __ent5: _TCCA[_T5],
         __ent6: _TCCA[_T6],
-    ) -> Query[Row[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]:
+        __ent7: _TCCA[_T7],/
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]:
         ...
 
     @overload
@@ -2797,7 +2813,11 @@ class Session(_SessionClassMethods, EventTarget):
         __ent5: _TCCA[_T5],
         __ent6: _TCCA[_T6],
         __ent7: _TCCA[_T7],
-    ) -> Query[Row[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]:
+        /,
+        *entities: _ColumnsClauseArgument[Any],
+    ) -> RowReturningQuery[
+        _T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, Unpack[Tuple[Any, ...]]
+    ]:
         ...
 
     # END OVERLOADED FUNCTIONS self.query
