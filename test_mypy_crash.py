@@ -5,7 +5,7 @@ with tempfile.TemporaryDirectory() as cachedir:
     for path in (
         # "test/typing/plain_files/ext/association_proxy/association_proxy_one.py",
         # "test/typing/plain_files/ext/association_proxy/association_proxy_three.py",
-        # "test/typing/plain_files/ext/association_proxy/association_proxy_two.py",
+        "test/typing/plain_files/ext/association_proxy/association_proxy_two.py",
         "test/typing/plain_files/ext/asyncio/async_sessionmaker.py",
     ):
         args = [
