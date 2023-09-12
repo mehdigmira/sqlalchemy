@@ -79,20 +79,15 @@ class MypyTest(TestBase):
             if use_cachedir is None:
                 use_cachedir = cachedir
             args = [
-                "--no-incremental",
+                # "--no-incremental",
                 "--enable-incomplete-feature=TypeVarTuple",
                 "--enable-incomplete-feature=Unpack",
                 "--strict",
                 "--raise-exceptions",
-                "--cache-dir",
-                use_cachedir,
+                # "--cache-dir",
+                # use_cachedir,
                 "--config-file",
-                os.path.join(
-                    use_cachedir,
-                    "sqla_mypy_config.cfg"
-                    if use_plugin
-                    else "plain_mypy_config.cfg",
-                ),
+                "plain_mypy.ini",
             ]
 
             # mypy as of 0.990 is more aggressively blocking messaging

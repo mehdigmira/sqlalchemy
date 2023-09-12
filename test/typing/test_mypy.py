@@ -15,3 +15,25 @@ class MypyPlainTest(fixtures.MypyTest):
     )
     def test_mypy_no_plugin(self, mypy_typecheck_file, path):
         mypy_typecheck_file(path)
+
+
+class MypyPlainTest2(fixtures.MypyTest):
+    def test_mypy_no_plugin_0(self, mypy_typecheck_file):
+        mypy_typecheck_file(
+            "/code/.debug/sqlalchemy/test/typing/plain_files/ext/association_proxy/association_proxy_one.py"
+        )
+
+    def test_mypy_no_plugin_1(self, mypy_typecheck_file):
+        mypy_typecheck_file(
+            "/code/.debug/sqlalchemy/test/typing/plain_files/ext/association_proxy/association_proxy_three.py"
+        )
+
+    def test_mypy_no_plugin_2(self, mypy_typecheck_file):
+        mypy_typecheck_file(
+            "/code/.debug/sqlalchemy/test/typing/plain_files/ext/association_proxy/association_proxy_two.py"
+        )
+
+    def test_mypy_no_plugin_3(self, mypy_typecheck_file):
+        mypy_typecheck_file(
+            "/code/.debug/sqlalchemy/test/typing/plain_files/ext/asyncio/async_sessionmaker.py"
+        )

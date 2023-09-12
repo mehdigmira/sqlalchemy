@@ -1545,23 +1545,23 @@ class Query(
     ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]:
         ...
 
-    @overload
-    def with_entities(
-        self,
-        __ent0: _TCCA[_T0],
-        __ent1: _TCCA[_T1],
-        __ent2: _TCCA[_T2],
-        __ent3: _TCCA[_T3],
-        __ent4: _TCCA[_T4],
-        __ent5: _TCCA[_T5],
-        __ent6: _TCCA[_T6],
-        __ent7: _TCCA[_T7],
-        /,
-        *entities: _ColumnsClauseArgument[Any],
-    ) -> RowReturningQuery[
-        _T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, Unpack[Tuple[Any, ...]]
-    ]:
-        ...
+    # @overload
+    # def with_entities(
+    #     self,
+    #     __ent0: _TCCA[_T0],
+    #     __ent1: _TCCA[_T1],
+    #     __ent2: _TCCA[_T2],
+    #     __ent3: _TCCA[_T3],
+    #     __ent4: _TCCA[_T4],
+    #     __ent5: _TCCA[_T5],
+    #     __ent6: _TCCA[_T6],
+    #     __ent7: _TCCA[_T7],
+    #     /,
+    #     *entities: _ColumnsClauseArgument[Any],
+    # ) -> RowReturningQuery[
+    #     _T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, Unpack[Tuple[Any, ...]]
+    # ]:
+    #     ...
 
     # END OVERLOADED FUNCTIONS self.with_entities
 
