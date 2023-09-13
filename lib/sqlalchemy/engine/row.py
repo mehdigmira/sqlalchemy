@@ -22,12 +22,14 @@ from typing import List
 from typing import Mapping
 from typing import NoReturn
 from typing import Optional
-from typing import overload
 from typing import Sequence
 from typing import Tuple
 from typing import TYPE_CHECKING
 from typing import TypeVar
-from typing import Union
+
+from typing_extensions import Self
+from typing_extensions import TypeVarTuple
+from typing_extensions import Unpack
 
 from ..sql import util as sql_util
 from ..util import deprecated
@@ -44,10 +46,21 @@ if TYPE_CHECKING:
     from .result import RMKeyView
 
 _T = TypeVar("_T", bound=Any)
-_TP = TypeVar("_TP", bound=Tuple[Any, ...])
+_TP = TypeVarTuple("_TP")
 
 
-class Row(BaseRow, Sequence[Any], Generic[_TP]):
+if TYPE_CHECKING:
+
+    class _Row(BaseRow, Tuple[Unpack[_TP]]):
+        ...
+
+else:
+
+    class _Row(BaseRow, Generic[Unpack[_TP]]):
+        ...
+
+
+class Row(_Row[Unpack[_TP]]):
     """Represent a single result row.
 
     The :class:`.Row` object represents a row of a database result.  It is
@@ -83,7 +96,7 @@ class Row(BaseRow, Sequence[Any], Generic[_TP]):
     def __delattr__(self, name: str) -> NoReturn:
         raise AttributeError("can't delete attribute")
 
-    def _tuple(self) -> _TP:
+    def _tuple(self) -> Self:
         """Return a 'tuple' form of this :class:`.Row`.
 
         At runtime, this method returns "self"; the :class:`.Row` object is
@@ -114,7 +127,7 @@ class Row(BaseRow, Sequence[Any], Generic[_TP]):
         "methods and library-level attributes are intended to be underscored "
         "to avoid name conflicts.  Please use :meth:`Row._tuple`.",
     )
-    def tuple(self) -> _TP:
+    def tuple(self) -> Self:
         """Return a 'tuple' form of this :class:`.Row`.
 
         .. versionadded:: 2.0
@@ -123,7 +136,7 @@ class Row(BaseRow, Sequence[Any], Generic[_TP]):
         return self._tuple()
 
     @property
-    def _t(self) -> _TP:
+    def _t(self) -> Self:
         """A synonym for :meth:`.Row._tuple`.
 
         .. versionadded:: 2.0.19 - The :attr:`.Row._t` attribute supersedes
@@ -145,7 +158,7 @@ class Row(BaseRow, Sequence[Any], Generic[_TP]):
         "methods and library-level attributes are intended to be underscored "
         "to avoid name conflicts.  Please use :attr:`Row._t`.",
     )
-    def t(self) -> _TP:
+    def t(self) -> Self:
         """A synonym for :meth:`.Row._tuple`.
 
         .. versionadded:: 2.0
@@ -172,7 +185,7 @@ class Row(BaseRow, Sequence[Any], Generic[_TP]):
 
     def _filter_on_values(
         self, processor: Optional[_ProcessorsType]
-    ) -> Row[Any]:
+    ) -> Row[Unpack[Tuple[Any, ...]]]:
         return Row(self._parent, processor, self._key_to_index, self._data)
 
     if not TYPE_CHECKING:
@@ -209,19 +222,6 @@ class Row(BaseRow, Sequence[Any], Generic[_TP]):
         )
 
     __hash__ = BaseRow.__hash__
-
-    if TYPE_CHECKING:
-
-        @overload
-        def __getitem__(self, index: int) -> Any:
-            ...
-
-        @overload
-        def __getitem__(self, index: slice) -> Sequence[Any]:
-            ...
-
-        def __getitem__(self, index: Union[int, slice]) -> Any:
-            ...
 
     def __lt__(self, other: Any) -> bool:
         return self._op(other, operator.lt)

@@ -33,6 +33,8 @@ from typing import TypeVar
 from typing import Union
 import weakref
 
+from typing_extensions import Unpack
+
 from . import attributes  # noqa
 from . import exc
 from ._typing import _O
@@ -416,7 +418,7 @@ def identity_key(
     ident: Union[Any, Tuple[Any, ...]] = None,
     *,
     instance: Optional[_T] = None,
-    row: Optional[Union[Row[Any], RowMapping]] = None,
+    row: Optional[Union[Row[Unpack[Tuple[Any, ...]]], RowMapping]] = None,
     identity_token: Optional[Any] = None,
 ) -> _IdentityKeyType[_T]:
     r"""Generate "identity key" tuples, as are used as keys in the
@@ -1706,9 +1708,9 @@ class Bundle(
     def create_row_processor(
         self,
         query: Select[Any],
-        procs: Sequence[Callable[[Row[Any]], Any]],
+        procs: Sequence[Callable[[Row[Unpack[Tuple[Any, ...]]]], Any]],
         labels: Sequence[str],
-    ) -> Callable[[Row[Any]], Any]:
+    ) -> Callable[[Row[Unpack[Tuple[Any, ...]]]], Any]:
         """Produce the "row processing" function for this :class:`.Bundle`.
 
         May be overridden by subclasses to provide custom behaviors when
@@ -1744,7 +1746,7 @@ class Bundle(
         """
         keyed_tuple = result_tuple(labels, [() for l in labels])
 
-        def proc(row: Row[Any]) -> Any:
+        def proc(row: Row[Unpack[Tuple[Any, ...]]]) -> Any:
             return keyed_tuple([proc(row) for proc in procs])
 
         return proc

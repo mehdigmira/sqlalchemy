@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import collections.abc as collections_abc
 import operator
-from typing import Any
+from typing import Any, TypeVarTuple
 from typing import Callable
 from typing import cast
 from typing import Dict
@@ -39,6 +39,8 @@ from typing import Type
 from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
+
+from typing_extensions import Unpack
 
 from . import attributes
 from . import interfaces
@@ -74,7 +76,6 @@ from ..sql import Select
 from ..sql import util as sql_util
 from ..sql import visitors
 from ..sql._typing import _FromClauseArgument
-from ..sql._typing import _TP
 from ..sql.annotation import SupportsCloneAnnotations
 from ..sql.base import _entity_namespace_key
 from ..sql.base import _generative
@@ -93,7 +94,6 @@ from ..sql.selectable import LABEL_STYLE_TABLENAME_PLUS_COL
 from ..sql.selectable import SelectLabelStyle
 from ..util.typing import Literal
 from ..util.typing import Self
-
 
 if TYPE_CHECKING:
     from ._typing import _EntityType
@@ -119,7 +119,6 @@ if TYPE_CHECKING:
     from ..sql._typing import _JoinTargetArgument
     from ..sql._typing import _LimitOffsetType
     from ..sql._typing import _MAYBE_ENTITY
-    from ..sql._typing import _no_kw
     from ..sql._typing import _NOT_ENTITY
     from ..sql._typing import _OnClauseArgument
     from ..sql._typing import _PropagateAttrsType
@@ -150,6 +149,7 @@ if TYPE_CHECKING:
 __all__ = ["Query", "QueryContext"]
 
 _T = TypeVar("_T", bound=Any)
+_Ts = TypeVarTuple("_Ts")
 
 
 @inspection._self_inspects
@@ -290,7 +290,7 @@ class Query(
             for ent in util.to_list(entities)
         ]
 
-    def tuples(self: Query[_O]) -> Query[Tuple[_O]]:
+    def tuples(self: Query[_O]) -> Query[Row[_O]]:
         """return a tuple-typed form of this :class:`.Query`.
 
         This method invokes the :meth:`.Query.only_return_tuples`
@@ -755,22 +755,6 @@ class Query(
         """
         return self.scalar_subquery()
 
-    @overload
-    def scalar_subquery(
-        self: Query[Tuple[_MAYBE_ENTITY]],
-    ) -> ScalarSelect[Any]:
-        ...
-
-    @overload
-    def scalar_subquery(
-        self: Query[Tuple[_NOT_ENTITY]],
-    ) -> ScalarSelect[_NOT_ENTITY]:
-        ...
-
-    @overload
-    def scalar_subquery(self) -> ScalarSelect[Any]:
-        ...
-
     def scalar_subquery(self) -> ScalarSelect[Any]:
         """Return the full SELECT statement represented by this
         :class:`_query.Query`, converted to a scalar subquery.
@@ -817,7 +801,7 @@ class Query(
     @overload
     def only_return_tuples(
         self: Query[_O], value: Literal[True]
-    ) -> RowReturningQuery[Tuple[_O]]:
+    ) -> Query[Row[_O]]:
         ...
 
     @overload
@@ -1470,31 +1454,30 @@ class Query(
             return None
 
     @overload
-    def with_entities(self, _entity: _EntityType[_O]) -> Query[_O]:
+    def with_entities(self, _entity: _EntityType[_O], /) -> Query[_O]:
         ...
 
     @overload
     def with_entities(
-        self,
-        _colexpr: roles.TypedColumnsClauseRole[_T],
-    ) -> RowReturningQuery[Tuple[_T]]:
+        self, _colexpr: roles.TypedColumnsClauseRole[_T], /
+    ) -> RowReturningQuery[_T]:
         ...
 
-    # START OVERLOADED FUNCTIONS self.with_entities RowReturningQuery 2-8
+    # START OVERLOADED FUNCTIONS self.with_entities Query 2-8
 
     # code within this block is **programmatically,
     # statically generated** by tools/generate_tuple_map_overloads.py
 
     @overload
     def with_entities(
-        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1]
-    ) -> RowReturningQuery[Tuple[_T0, _T1]]:
+        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], /
+    ) -> RowReturningQuery[_T0, _T1]:
         ...
 
     @overload
     def with_entities(
-        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], __ent2: _TCCA[_T2]
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2]]:
+        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], __ent2: _TCCA[_T2], /
+    ) -> RowReturningQuery[_T0, _T1, _T2]:
         ...
 
     @overload
@@ -1504,7 +1487,8 @@ class Query(
         __ent1: _TCCA[_T1],
         __ent2: _TCCA[_T2],
         __ent3: _TCCA[_T3],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3]]:
+        /,
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3]:
         ...
 
     @overload
@@ -1515,7 +1499,8 @@ class Query(
         __ent2: _TCCA[_T2],
         __ent3: _TCCA[_T3],
         __ent4: _TCCA[_T4],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3, _T4]]:
+        /,
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4]:
         ...
 
     @overload
@@ -1527,7 +1512,8 @@ class Query(
         __ent3: _TCCA[_T3],
         __ent4: _TCCA[_T4],
         __ent5: _TCCA[_T5],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]:
+        /,
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4, _T5]:
         ...
 
     @overload
@@ -1540,7 +1526,8 @@ class Query(
         __ent4: _TCCA[_T4],
         __ent5: _TCCA[_T5],
         __ent6: _TCCA[_T6],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]:
+        /,
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4, _T5, _T6]:
         ...
 
     @overload
@@ -1554,20 +1541,40 @@ class Query(
         __ent5: _TCCA[_T5],
         __ent6: _TCCA[_T6],
         __ent7: _TCCA[_T7],
-    ) -> RowReturningQuery[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]:
+        /,
+    ) -> RowReturningQuery[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]:
+        ...
+
+    @overload
+    def with_entities(
+        self,
+        __ent0: _TCCA[_T0],
+        __ent1: _TCCA[_T1],
+        __ent2: _TCCA[_T2],
+        __ent3: _TCCA[_T3],
+        __ent4: _TCCA[_T4],
+        __ent5: _TCCA[_T5],
+        __ent6: _TCCA[_T6],
+        __ent7: _TCCA[_T7],
+        /,
+        *entities: _ColumnsClauseArgument[Any],
+    ) -> RowReturningQuery[
+        _T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, Unpack[Tuple[Any, ...]]
+    ]:
         ...
 
     # END OVERLOADED FUNCTIONS self.with_entities
 
     @overload
     def with_entities(
-        self, *entities: _ColumnsClauseArgument[Any]
+        self,
+        *entities: _ColumnsClauseArgument[Any],
     ) -> Query[Any]:
         ...
 
     @_generative
     def with_entities(
-        self, *entities: _ColumnsClauseArgument[Any], **__kw: Any
+        self, *entities: _ColumnsClauseArgument[Any]
     ) -> Query[Any]:
         r"""Return a new :class:`_query.Query`
         replacing the SELECT list with the
@@ -1595,9 +1602,6 @@ class Query(
 
             :meth:`_sql.Select.with_only_columns` - v2 comparable method.
         """
-        if __kw:
-            raise _no_kw()
-
         # Query has all the same fields as Select for this operation
         # this could in theory be based on a protocol but not sure if it's
         # worth it
@@ -2834,12 +2838,12 @@ class Query(
             result._soft_close()
             raise
 
-    def _iter(self) -> Union[ScalarResult[_T], Result[_T]]:
+    def _iter(self) -> Any:
         # new style execution.
         params = self._params
 
         statement = self._statement_20()
-        result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+        result = self.session.execute(
             statement,
             params,
             execution_options={"_sa_orm_load_options": self.load_options},
@@ -2934,7 +2938,7 @@ class Query(
     )
     def instances(
         self,
-        result_proxy: CursorResult[Any],
+        result_proxy: CursorResult[Unpack[Tuple[Any, ...]]],
         context: Optional[QueryContext] = None,
     ) -> Any:
         """Return an ORM result given a :class:`_engine.CursorResult` and
@@ -3173,7 +3177,7 @@ class Query(
 
         delete_ = sql.delete(*self._raw_columns)  # type: ignore
         delete_._where_criteria = self._where_criteria
-        result: CursorResult[Any] = self.session.execute(
+        result: CursorResult[Unpack[Tuple[Any, ...]]] = self.session.execute(
             delete_,
             self._params,
             execution_options=self._execution_options.union(
@@ -3263,7 +3267,7 @@ class Query(
             upd = upd.with_dialect_options(**update_args)
 
         upd._where_criteria = self._where_criteria
-        result: CursorResult[Any] = self.session.execute(
+        result: CursorResult[Unpack[Tuple[Any, ...]]] = self.session.execute(
             upd,
             self._params,
             execution_options=self._execution_options.union(
@@ -3402,8 +3406,36 @@ class BulkDelete(BulkUD):
     """BulkUD which handles DELETEs."""
 
 
-class RowReturningQuery(Query[Row[_TP]]):
+class RowReturningQuery(Query[Row[Unpack[_Ts]]]):
     if TYPE_CHECKING:
 
-        def tuples(self) -> Query[_TP]:  # type: ignore
+        def tuples(self) -> Self:  # type: ignore
+            ...
+
+        @property
+        def statement(  # type: ignore
+            self,
+        ) -> Union[Select[Unpack[_Ts]], FromStatement[Unpack[_Ts]]]:
+            ...
+
+        @property
+        def selectable(  # type: ignore
+            self,
+        ) -> Union[Select[Unpack[_Ts]], FromStatement[Unpack[_Ts]]]:
+            ...
+
+        def __clause_element__(  # type: ignore
+            self,
+        ) -> Union[Select[Unpack[_Ts]], FromStatement[Unpack[_Ts]]]:
+            ...
+
+        @overload
+        def scalar_subquery(self: RowReturningQuery[_T]) -> ScalarSelect[_T]:
+            ...
+
+        @overload
+        def scalar_subquery(self) -> ScalarSelect[Any]:
+            ...
+
+        def scalar_subquery(self) -> ScalarSelect[Any]:
             ...

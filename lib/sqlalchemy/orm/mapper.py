@@ -44,6 +44,8 @@ from typing import TypeVar
 from typing import Union
 import weakref
 
+from typing_extensions import Unpack
+
 from . import attributes
 from . import exc as orm_exc
 from . import instrumentation
@@ -3428,7 +3430,7 @@ class Mapper(
 
     def identity_key_from_row(
         self,
-        row: Optional[Union[Row[Any], RowMapping]],
+        row: Optional[Union[Row[Unpack[Tuple[Any, ...]]], RowMapping]],
         identity_token: Optional[Any] = None,
         adapter: Optional[ORMAdapter] = None,
     ) -> _IdentityKeyType[_O]:

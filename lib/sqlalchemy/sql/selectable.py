@@ -17,8 +17,8 @@ import collections
 from enum import Enum
 import itertools
 from typing import AbstractSet
-from typing import Any as TODO_Any
 from typing import Any
+from typing import Any as TODO_Any
 from typing import Callable
 from typing import cast
 from typing import Dict
@@ -36,7 +36,9 @@ from typing import Tuple
 from typing import Type
 from typing import TYPE_CHECKING
 from typing import TypeVar
+from typing import TypeVarTuple
 from typing import Union
+from typing import Unpack
 
 from . import cache_key
 from . import coercions
@@ -104,6 +106,7 @@ from ..util.typing import Self
 and_ = BooleanClauseList.and_
 
 _T = TypeVar("_T", bound=Any)
+_Ts = TypeVarTuple("_Ts")
 
 if TYPE_CHECKING:
     from ._typing import _ColumnExpressionArgument
@@ -283,7 +286,7 @@ class ExecutableReturnsRows(Executable, ReturnsRows):
     """base for executable statements that return rows."""
 
 
-class TypedReturnsRows(ExecutableReturnsRows, Generic[_TP]):
+class TypedReturnsRows(ExecutableReturnsRows, Generic[Unpack[_Ts]]):
     """base for executable statements that return rows."""
 
 
@@ -612,7 +615,7 @@ class FromClause(roles.AnonymizedFromClauseRole, Selectable):
 
     _use_schema_map = False
 
-    def select(self) -> Select[Any]:
+    def select(self) -> Select[Unpack[Tuple[Any, ...]]]:
         r"""Return a SELECT of this :class:`_expression.FromClause`.
 
 
@@ -1498,7 +1501,7 @@ class Join(roles.DMLTableRole, FromClause):
                 "join explicitly." % (a.description, b.description)
             )
 
-    def select(self) -> Select[Any]:
+    def select(self) -> Select[Unpack[Tuple[Any, ...]]]:
         r"""Create a :class:`_expression.Select` from this
         :class:`_expression.Join`.
 
@@ -4492,7 +4495,7 @@ class SelectState(util.MemoizedSlots, CompileState):
 
     def __init__(
         self,
-        statement: Select[Any],
+        statement: Select[Unpack[Tuple[Any, ...]]],
         compiler: Optional[SQLCompiler],
         **kw: Any,
     ):
@@ -4520,7 +4523,7 @@ class SelectState(util.MemoizedSlots, CompileState):
 
     @classmethod
     def get_column_descriptions(
-        cls, statement: Select[Any]
+        cls, statement: Select[Unpack[Tuple[Any, ...]]]
     ) -> List[Dict[str, Any]]:
         return [
             {
@@ -4535,13 +4538,15 @@ class SelectState(util.MemoizedSlots, CompileState):
 
     @classmethod
     def from_statement(
-        cls, statement: Select[Any], from_statement: roles.ReturnsRowsRole
+        cls,
+        statement: Select[Unpack[Tuple[Any, ...]]],
+        from_statement: roles.ReturnsRowsRole,
     ) -> ExecutableReturnsRows:
         cls._plugin_not_implemented()
 
     @classmethod
     def get_columns_clause_froms(
-        cls, statement: Select[Any]
+        cls, statement: Select[Unpack[Tuple[Any, ...]]]
     ) -> List[FromClause]:
         return cls._normalize_froms(
             itertools.chain.from_iterable(
@@ -4769,7 +4774,7 @@ class SelectState(util.MemoizedSlots, CompileState):
 
     @classmethod
     def determine_last_joined_entity(
-        cls, stmt: Select[Any]
+        cls, stmt: Select[Unpack[Tuple[Any, ...]]]
     ) -> Optional[_JoinTargetElement]:
         if stmt._setup_joins:
             return stmt._setup_joins[-1][0]
@@ -4777,7 +4782,9 @@ class SelectState(util.MemoizedSlots, CompileState):
             return None
 
     @classmethod
-    def all_selected_columns(cls, statement: Select[Any]) -> _SelectIterable:
+    def all_selected_columns(
+        cls, statement: Select[Unpack[Tuple[Any, ...]]]
+    ) -> _SelectIterable:
         return [c for c in _select_iterables(statement._raw_columns)]
 
     def _setup_joins(
@@ -5023,7 +5030,9 @@ class _MemoizedSelectEntities(
         return c  # type: ignore
 
     @classmethod
-    def _generate_for_statement(cls, select_stmt: Select[Any]) -> None:
+    def _generate_for_statement(
+        cls, select_stmt: Select[Unpack[Tuple[Any, ...]]]
+    ) -> None:
         if select_stmt._setup_joins or select_stmt._with_options:
             self = _MemoizedSelectEntities()
             self._raw_columns = select_stmt._raw_columns
@@ -5042,7 +5051,7 @@ class Select(
     HasCompileState,
     _SelectFromElements,
     GenerativeSelect,
-    TypedReturnsRows[_TP],
+    TypedReturnsRows[Unpack[_Ts]],
 ):
     """Represents a ``SELECT`` statement.
 
@@ -5178,13 +5187,13 @@ class Select(
 
         @overload
         def scalar_subquery(
-            self: Select[Tuple[_MAYBE_ENTITY]],
+            self: Select[_MAYBE_ENTITY],
         ) -> ScalarSelect[Any]:
             ...
 
         @overload
         def scalar_subquery(
-            self: Select[Tuple[_NOT_ENTITY]],
+            self: Select[_NOT_ENTITY],
         ) -> ScalarSelect[_NOT_ENTITY]:
             ...
 
@@ -5666,7 +5675,7 @@ class Select(
     @_generative
     def add_columns(
         self, *entities: _ColumnsClauseArgument[Any]
-    ) -> Select[Any]:
+    ) -> Select[Unpack[Tuple[Any, ...]]]:
         r"""Return a new :func:`_expression.select` construct with
         the given entities appended to its columns clause.
 
@@ -5772,19 +5781,19 @@ class Select(
     # statically generated** by tools/generate_sel_v1_overloads.py
 
     @overload
-    def with_only_columns(self, __ent0: _TCCA[_T0]) -> Select[Tuple[_T0]]:
+    def with_only_columns(self, __ent0: _TCCA[_T0], /) -> Select[_T0]:
         ...
 
     @overload
     def with_only_columns(
-        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1]
-    ) -> Select[Tuple[_T0, _T1]]:
+        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], /
+    ) -> Select[_T0, _T1]:
         ...
 
     @overload
     def with_only_columns(
-        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], __ent2: _TCCA[_T2]
-    ) -> Select[Tuple[_T0, _T1, _T2]]:
+        self, __ent0: _TCCA[_T0], __ent1: _TCCA[_T1], __ent2: _TCCA[_T2], /
+    ) -> Select[_T0, _T1, _T2]:
         ...
 
     @overload
@@ -5794,7 +5803,8 @@ class Select(
         __ent1: _TCCA[_T1],
         __ent2: _TCCA[_T2],
         __ent3: _TCCA[_T3],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3]]:
+        /,
+    ) -> Select[_T0, _T1, _T2, _T3]:
         ...
 
     @overload
@@ -5805,7 +5815,8 @@ class Select(
         __ent2: _TCCA[_T2],
         __ent3: _TCCA[_T3],
         __ent4: _TCCA[_T4],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4]]:
+        /,
+    ) -> Select[_T0, _T1, _T2, _T3, _T4]:
         ...
 
     @overload
@@ -5817,7 +5828,8 @@ class Select(
         __ent3: _TCCA[_T3],
         __ent4: _TCCA[_T4],
         __ent5: _TCCA[_T5],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5]]:
+        /,
+    ) -> Select[_T0, _T1, _T2, _T3, _T4, _T5]:
         ...
 
     @overload
@@ -5830,7 +5842,8 @@ class Select(
         __ent4: _TCCA[_T4],
         __ent5: _TCCA[_T5],
         __ent6: _TCCA[_T6],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6]]:
+        /,
+    ) -> Select[_T0, _T1, _T2, _T3, _T4, _T5, _T6]:
         ...
 
     @overload
@@ -5844,7 +5857,25 @@ class Select(
         __ent5: _TCCA[_T5],
         __ent6: _TCCA[_T6],
         __ent7: _TCCA[_T7],
-    ) -> Select[Tuple[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]]:
+        /,
+    ) -> Select[_T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7]:
+        ...
+
+    @overload
+    def with_only_columns(
+        self,
+        __ent0: _TCCA[_T0],
+        __ent1: _TCCA[_T1],
+        __ent2: _TCCA[_T2],
+        __ent3: _TCCA[_T3],
+        __ent4: _TCCA[_T4],
+        __ent5: _TCCA[_T5],
+        __ent6: _TCCA[_T6],
+        __ent7: _TCCA[_T7],
+        *entities: _ColumnsClauseArgument[Any],
+    ) -> Select[
+        _T0, _T1, _T2, _T3, _T4, _T5, _T6, _T7, Unpack[Tuple[Any, ...]]
+    ]:
         ...
 
     # END OVERLOADED FUNCTIONS self.with_only_columns
@@ -5855,7 +5886,7 @@ class Select(
         *entities: _ColumnsClauseArgument[Any],
         maintain_column_froms: bool = False,
         **__kw: Any,
-    ) -> Select[Any]:
+    ) -> Select[Unpack[Tuple[Any, ...]]]:
         ...
 
     @_generative
@@ -5864,7 +5895,7 @@ class Select(
         *entities: _ColumnsClauseArgument[Any],
         maintain_column_froms: bool = False,
         **__kw: Any,
-    ) -> Select[Any]:
+    ) -> Select[Unpack[Tuple[Any, ...]]]:
         r"""Return a new :func:`_expression.select` construct with its columns
         clause replaced with the given entities.
 
@@ -6257,7 +6288,7 @@ class Select(
         meth = SelectState.get_plugin_class(self).all_selected_columns
         return list(meth(self))
 
-    def _ensure_disambiguated_names(self) -> Select[Any]:
+    def _ensure_disambiguated_names(self) -> Select[Unpack[Tuple[Any, ...]]]:
         if self._label_style is LABEL_STYLE_NONE:
             self = self.set_label_style(LABEL_STYLE_DISAMBIGUATE_ONLY)
         return self

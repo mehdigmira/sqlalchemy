@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-from typing import Any
+from typing import Any, TypeVarTuple
 from typing import AsyncIterator
 from typing import Callable
 from typing import Dict
@@ -21,6 +21,8 @@ from typing import Type
 from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
+
+from typing_extensions import Unpack
 
 from . import exc as async_exc
 from .base import asyncstartablecontext
@@ -62,6 +64,7 @@ if TYPE_CHECKING:
     from ...sql.selectable import TypedReturnsRows
 
 _T = TypeVar("_T", bound=Any)
+_Ts = TypeVarTuple("_Ts")
 
 
 def create_async_engine(url: Union[str, URL], **kw: Any) -> AsyncEngine:
@@ -493,7 +496,7 @@ class AsyncConnection(
         statement: str,
         parameters: Optional[_DBAPIAnyExecuteParams] = None,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         r"""Executes a driver-level SQL string and return buffered
         :class:`_engine.Result`.
 
@@ -512,11 +515,11 @@ class AsyncConnection(
     @overload
     def stream(
         self,
-        statement: TypedReturnsRows[_T],
+        statement: TypedReturnsRows[Unpack[_Ts]],
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> GeneratorStartableContext[AsyncResult[_T]]:
+    ) -> GeneratorStartableContext[AsyncResult[Unpack[_Ts]]]:
         ...
 
     @overload
@@ -536,7 +539,7 @@ class AsyncConnection(
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> AsyncIterator[AsyncResult[Any]]:
+    ) -> AsyncIterator[AsyncResult[Unpack[Tuple[Any, ...]]]]:
         """Execute a statement and return an awaitable yielding a
         :class:`_asyncio.AsyncResult` object.
 
@@ -594,11 +597,11 @@ class AsyncConnection(
     @overload
     async def execute(
         self,
-        statement: TypedReturnsRows[_T],
+        statement: TypedReturnsRows[Unpack[_Ts]],
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> CursorResult[_T]:
+    ) -> CursorResult[Unpack[_Ts]]:
         ...
 
     @overload
@@ -608,7 +611,7 @@ class AsyncConnection(
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         ...
 
     async def execute(
@@ -617,7 +620,7 @@ class AsyncConnection(
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         r"""Executes a SQL statement construct and return a buffered
         :class:`_engine.Result`.
 
@@ -661,7 +664,7 @@ class AsyncConnection(
     @overload
     async def scalar(
         self,
-        statement: TypedReturnsRows[Tuple[_T]],
+        statement: TypedReturnsRows[_T],
         parameters: Optional[_CoreSingleExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
@@ -703,7 +706,7 @@ class AsyncConnection(
     @overload
     async def scalars(
         self,
-        statement: TypedReturnsRows[Tuple[_T]],
+        statement: TypedReturnsRows[_T],
         parameters: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,
@@ -746,7 +749,7 @@ class AsyncConnection(
     @overload
     def stream_scalars(
         self,
-        statement: TypedReturnsRows[Tuple[_T]],
+        statement: TypedReturnsRows[_T],
         parameters: Optional[_CoreSingleExecuteParams] = None,
         *,
         execution_options: Optional[CoreExecuteOptionsParameter] = None,

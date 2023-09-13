@@ -16,8 +16,10 @@ from typing import Tuple
 from typing import TYPE_CHECKING
 from typing import TypeVar
 
+from typing_extensions import TypeVarTuple
+from typing_extensions import Unpack
+
 from . import exc as async_exc
-from ... import util
 from ...engine import Result
 from ...engine.result import _NO_ROW
 from ...engine.result import _R
@@ -38,13 +40,13 @@ if TYPE_CHECKING:
     from ...engine.result import _UniqueFilterType
 
 _T = TypeVar("_T", bound=Any)
-_TP = TypeVar("_TP", bound=Tuple[Any, ...])
+_TP = TypeVarTuple("_TP")
 
 
 class AsyncCommon(FilterResult[_R]):
     __slots__ = ()
 
-    _real_result: Result[Any]
+    _real_result: Result[Unpack[tuple[Any, ...]]]
     _metadata: ResultMetaData
 
     async def close(self) -> None:  # type: ignore[override]
@@ -63,7 +65,7 @@ class AsyncCommon(FilterResult[_R]):
         return self._real_result.closed  # type: ignore
 
 
-class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
+class AsyncResult(_WithKeys, AsyncCommon[Row[Unpack[_TP]]]):
     """An asyncio wrapper around a :class:`_result.Result` object.
 
     The :class:`_asyncio.AsyncResult` only applies to statement executions that
@@ -86,9 +88,9 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
 
     __slots__ = ()
 
-    _real_result: Result[_TP]
+    _real_result: Result[Unpack[_TP]]
 
-    def __init__(self, real_result: Result[_TP]):
+    def __init__(self, real_result: Result[Unpack[_TP]]):
         self._real_result = real_result
 
         self._metadata = real_result._metadata
@@ -103,7 +105,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
             )
 
     @property
-    def t(self) -> AsyncTupleResult[_TP]:
+    def t(self) -> AsyncResult[Unpack[_TP]]:
         """Apply a "typed tuple" typing filter to returned rows.
 
         The :attr:`_asyncio.AsyncResult.t` attribute is a synonym for
@@ -114,7 +116,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
         """
         return self  # type: ignore
 
-    def tuples(self) -> AsyncTupleResult[_TP]:
+    def tuples(self) -> Self:
         """Apply a "typed tuple" typing filter to returned rows.
 
         This method returns the same :class:`_asyncio.AsyncResult` object
@@ -163,7 +165,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
 
     async def partitions(
         self, size: Optional[int] = None
-    ) -> AsyncIterator[Sequence[Row[_TP]]]:
+    ) -> AsyncIterator[Sequence[Row[Unpack[_TP]]]]:
         """Iterate through sub-lists of rows of the size given.
 
         An async iterator is returned::
@@ -188,7 +190,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
             else:
                 break
 
-    async def fetchall(self) -> Sequence[Row[_TP]]:
+    async def fetchall(self) -> Sequence[Row[Unpack[_TP]]]:
         """A synonym for the :meth:`_asyncio.AsyncResult.all` method.
 
         .. versionadded:: 2.0
@@ -197,7 +199,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
 
         return await greenlet_spawn(self._allrows)
 
-    async def fetchone(self) -> Optional[Row[_TP]]:
+    async def fetchone(self) -> Optional[Row[Unpack[_TP]]]:
         """Fetch one row.
 
         When all rows are exhausted, returns None.
@@ -221,7 +223,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
 
     async def fetchmany(
         self, size: Optional[int] = None
-    ) -> Sequence[Row[_TP]]:
+    ) -> Sequence[Row[Unpack[_TP]]]:
         """Fetch many rows.
 
         When all rows are exhausted, returns an empty list.
@@ -242,7 +244,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
 
         return await greenlet_spawn(self._manyrow_getter, self, size)
 
-    async def all(self) -> Sequence[Row[_TP]]:
+    async def all(self) -> Sequence[Row[Unpack[_TP]]]:
         """Return all rows in a list.
 
         Closes the result set after invocation.   Subsequent invocations
@@ -254,17 +256,17 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
 
         return await greenlet_spawn(self._allrows)
 
-    def __aiter__(self) -> AsyncResult[_TP]:
+    def __aiter__(self) -> AsyncResult[Unpack[_TP]]:
         return self
 
-    async def __anext__(self) -> Row[_TP]:
+    async def __anext__(self) -> Row[Unpack[_TP]]:
         row = await greenlet_spawn(self._onerow_getter, self)
         if row is _NO_ROW:
             raise StopAsyncIteration()
         else:
             return row
 
-    async def first(self) -> Optional[Row[_TP]]:
+    async def first(self) -> Optional[Row[Unpack[_TP]]]:
         """Fetch the first row or ``None`` if no row is present.
 
         Closes the result set and discards remaining rows.
@@ -300,7 +302,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
         """
         return await greenlet_spawn(self._only_one_row, False, False, False)
 
-    async def one_or_none(self) -> Optional[Row[_TP]]:
+    async def one_or_none(self) -> Optional[Row[Unpack[_TP]]]:
         """Return at most one result or raise an exception.
 
         Returns ``None`` if the result has no rows.
@@ -324,7 +326,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
         return await greenlet_spawn(self._only_one_row, True, False, False)
 
     @overload
-    async def scalar_one(self: AsyncResult[Tuple[_T]]) -> _T:
+    async def scalar_one(self: AsyncResult[_T]) -> _T:
         ...
 
     @overload
@@ -348,7 +350,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
 
     @overload
     async def scalar_one_or_none(
-        self: AsyncResult[Tuple[_T]],
+        self: AsyncResult[_T],
     ) -> Optional[_T]:
         ...
 
@@ -371,7 +373,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
         """
         return await greenlet_spawn(self._only_one_row, True, False, True)
 
-    async def one(self) -> Row[_TP]:
+    async def one(self) -> Row[Unpack[_TP]]:
         """Return exactly one row or raise an exception.
 
         Raises :class:`.NoResultFound` if the result returns no
@@ -403,7 +405,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
         return await greenlet_spawn(self._only_one_row, True, True, False)
 
     @overload
-    async def scalar(self: AsyncResult[Tuple[_T]]) -> Optional[_T]:
+    async def scalar(self: AsyncResult[_T]) -> Optional[_T]:
         ...
 
     @overload
@@ -426,7 +428,7 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
         """
         return await greenlet_spawn(self._only_one_row, False, False, True)
 
-    async def freeze(self) -> FrozenResult[_TP]:
+    async def freeze(self) -> FrozenResult[Unpack[_TP]]:
         """Return a callable object that will produce copies of this
         :class:`_asyncio.AsyncResult` when invoked.
 
@@ -451,12 +453,12 @@ class AsyncResult(_WithKeys, AsyncCommon[Row[_TP]]):
 
     @overload
     def scalars(
-        self: AsyncResult[Tuple[_T]], index: Literal[0]
+        self: AsyncResult[_T], index: Literal[0]
     ) -> AsyncScalarResult[_T]:
         ...
 
     @overload
-    def scalars(self: AsyncResult[Tuple[_T]]) -> AsyncScalarResult[_T]:
+    def scalars(self: AsyncResult[_T]) -> AsyncScalarResult[_T]:
         ...
 
     @overload
@@ -513,7 +515,11 @@ class AsyncScalarResult(AsyncCommon[_R]):
 
     _generate_rows = False
 
-    def __init__(self, real_result: Result[Any], index: _KeyIndexType):
+    def __init__(
+        self,
+        real_result: Result[Unpack[tuple[Any, ...]]],
+        index: _KeyIndexType,
+    ):
         self._real_result = real_result
 
         if real_result._source_supports_scalars:
@@ -644,7 +650,7 @@ class AsyncMappingResult(_WithKeys, AsyncCommon[RowMapping]):
 
     _post_creational_filter = operator.attrgetter("_mapping")
 
-    def __init__(self, result: Result[Any]):
+    def __init__(self, result: Result[Unpack[tuple[Any, ...]]]):
         self._real_result = result
         self._unique_filter_state = result._unique_filter_state
         self._metadata = result._metadata
@@ -773,182 +779,11 @@ class AsyncMappingResult(_WithKeys, AsyncCommon[RowMapping]):
         return await greenlet_spawn(self._only_one_row, True, True, False)
 
 
-class AsyncTupleResult(AsyncCommon[_R], util.TypingOnly):
-    """A :class:`_asyncio.AsyncResult` that's typed as returning plain
-    Python tuples instead of rows.
-
-    Since :class:`_engine.Row` acts like a tuple in every way already,
-    this class is a typing only class, regular :class:`_asyncio.AsyncResult` is
-    still used at runtime.
-
-    """
-
-    __slots__ = ()
-
-    if TYPE_CHECKING:
-
-        async def partitions(
-            self, size: Optional[int] = None
-        ) -> AsyncIterator[Sequence[_R]]:
-            """Iterate through sub-lists of elements of the size given.
-
-            Equivalent to :meth:`_result.Result.partitions` except that
-            tuple values, rather than :class:`_engine.Row` objects,
-            are returned.
-
-            """
-            ...
-
-        async def fetchone(self) -> Optional[_R]:
-            """Fetch one tuple.
-
-            Equivalent to :meth:`_result.Result.fetchone` except that
-            tuple values, rather than :class:`_engine.Row`
-            objects, are returned.
-
-            """
-            ...
-
-        async def fetchall(self) -> Sequence[_R]:
-            """A synonym for the :meth:`_engine.ScalarResult.all` method."""
-            ...
-
-        async def fetchmany(self, size: Optional[int] = None) -> Sequence[_R]:
-            """Fetch many objects.
-
-            Equivalent to :meth:`_result.Result.fetchmany` except that
-            tuple values, rather than :class:`_engine.Row` objects,
-            are returned.
-
-            """
-            ...
-
-        async def all(self) -> Sequence[_R]:  # noqa: A001
-            """Return all scalar values in a list.
-
-            Equivalent to :meth:`_result.Result.all` except that
-            tuple values, rather than :class:`_engine.Row` objects,
-            are returned.
-
-            """
-            ...
-
-        async def __aiter__(self) -> AsyncIterator[_R]:
-            ...
-
-        async def __anext__(self) -> _R:
-            ...
-
-        async def first(self) -> Optional[_R]:
-            """Fetch the first object or ``None`` if no object is present.
-
-            Equivalent to :meth:`_result.Result.first` except that
-            tuple values, rather than :class:`_engine.Row` objects,
-            are returned.
-
-
-            """
-            ...
-
-        async def one_or_none(self) -> Optional[_R]:
-            """Return at most one object or raise an exception.
-
-            Equivalent to :meth:`_result.Result.one_or_none` except that
-            tuple values, rather than :class:`_engine.Row` objects,
-            are returned.
-
-            """
-            ...
-
-        async def one(self) -> _R:
-            """Return exactly one object or raise an exception.
-
-            Equivalent to :meth:`_result.Result.one` except that
-            tuple values, rather than :class:`_engine.Row` objects,
-            are returned.
-
-            """
-            ...
-
-        @overload
-        async def scalar_one(self: AsyncTupleResult[Tuple[_T]]) -> _T:
-            ...
-
-        @overload
-        async def scalar_one(self) -> Any:
-            ...
-
-        async def scalar_one(self) -> Any:
-            """Return exactly one scalar result or raise an exception.
-
-            This is equivalent to calling :meth:`_engine.Result.scalars`
-            and then :meth:`_engine.Result.one`.
-
-            .. seealso::
-
-                :meth:`_engine.Result.one`
-
-                :meth:`_engine.Result.scalars`
-
-            """
-            ...
-
-        @overload
-        async def scalar_one_or_none(
-            self: AsyncTupleResult[Tuple[_T]],
-        ) -> Optional[_T]:
-            ...
-
-        @overload
-        async def scalar_one_or_none(self) -> Optional[Any]:
-            ...
-
-        async def scalar_one_or_none(self) -> Optional[Any]:
-            """Return exactly one or no scalar result.
-
-            This is equivalent to calling :meth:`_engine.Result.scalars`
-            and then :meth:`_engine.Result.one_or_none`.
-
-            .. seealso::
-
-                :meth:`_engine.Result.one_or_none`
-
-                :meth:`_engine.Result.scalars`
-
-            """
-            ...
-
-        @overload
-        async def scalar(self: AsyncTupleResult[Tuple[_T]]) -> Optional[_T]:
-            ...
-
-        @overload
-        async def scalar(self) -> Any:
-            ...
-
-        async def scalar(self) -> Any:
-            """Fetch the first column of the first row, and close the result
-            set.
-
-            Returns ``None`` if there are no rows to fetch.
-
-            No validation is performed to test if additional rows remain.
-
-            After calling this method, the object is fully closed,
-            e.g. the :meth:`_engine.CursorResult.close`
-            method will have been called.
-
-            :return: a Python scalar value , or ``None`` if no rows remain.
-
-            """
-            ...
-
-
-_RT = TypeVar("_RT", bound="Result[Any]")
+_RT = TypeVar("_RT", bound="Result[Unpack[Tuple[Any, ...]]]")
 
 
 async def _ensure_sync_result(result: _RT, calling_method: Any) -> _RT:
-    cursor_result: CursorResult[Any]
+    cursor_result: CursorResult[Unpack[Tuple[Any, ...]]]
 
     try:
         is_cursor = result._is_cursor

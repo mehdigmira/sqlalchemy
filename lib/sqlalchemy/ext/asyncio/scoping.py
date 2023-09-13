@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TypeVarTuple
 from typing import Callable
 from typing import Generic
 from typing import Iterable
@@ -20,6 +20,8 @@ from typing import Type
 from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
+
+from typing_extensions import Unpack
 
 from .session import _AS
 from .session import async_sessionmaker
@@ -61,6 +63,7 @@ if TYPE_CHECKING:
     from ...sql.selectable import TypedReturnsRows
 
 _T = TypeVar("_T", bound=Any)
+_Ts = TypeVarTuple("_Ts")
 
 
 @create_proxy_methods(
@@ -546,14 +549,14 @@ class async_scoped_session(Generic[_AS]):
     @overload
     async def execute(
         self,
-        statement: TypedReturnsRows[_T],
+        statement: TypedReturnsRows[Unpack[_Ts]],
         params: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
         bind_arguments: Optional[_BindArguments] = None,
         _parent_execute_state: Optional[Any] = None,
         _add_event: Optional[Any] = None,
-    ) -> Result[_T]:
+    ) -> Result[Unpack[_Ts]]:
         ...
 
     @overload
@@ -566,7 +569,7 @@ class async_scoped_session(Generic[_AS]):
         bind_arguments: Optional[_BindArguments] = None,
         _parent_execute_state: Optional[Any] = None,
         _add_event: Optional[Any] = None,
-    ) -> CursorResult[Any]:
+    ) -> CursorResult[Unpack[Tuple[Any, ...]]]:
         ...
 
     @overload
@@ -1021,7 +1024,7 @@ class async_scoped_session(Generic[_AS]):
     @overload
     async def scalar(
         self,
-        statement: TypedReturnsRows[Tuple[_T]],
+        statement: TypedReturnsRows[_T],
         params: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
@@ -1076,7 +1079,7 @@ class async_scoped_session(Generic[_AS]):
     @overload
     async def scalars(
         self,
-        statement: TypedReturnsRows[Tuple[_T]],
+        statement: TypedReturnsRows[_T],
         params: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
@@ -1140,13 +1143,13 @@ class async_scoped_session(Generic[_AS]):
     @overload
     async def stream(
         self,
-        statement: TypedReturnsRows[_T],
+        statement: TypedReturnsRows[Unpack[_Ts]],
         params: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
         bind_arguments: Optional[_BindArguments] = None,
         **kw: Any,
-    ) -> AsyncResult[_T]:
+    ) -> AsyncResult[Unpack[_Ts]]:
         ...
 
     @overload
@@ -1192,7 +1195,7 @@ class async_scoped_session(Generic[_AS]):
     @overload
     async def stream_scalars(
         self,
-        statement: TypedReturnsRows[Tuple[_T]],
+        statement: TypedReturnsRows[_T],
         params: Optional[_CoreAnyExecuteParams] = None,
         *,
         execution_options: OrmExecuteOptionsParameter = util.EMPTY_DICT,
@@ -1524,7 +1527,7 @@ class async_scoped_session(Generic[_AS]):
         ident: Union[Any, Tuple[Any, ...]] = None,
         *,
         instance: Optional[Any] = None,
-        row: Optional[Union[Row[Any], RowMapping]] = None,
+        row: Optional[Union[Row[Unpack[Tuple[Any, ...]]], RowMapping]] = None,
         identity_token: Optional[Any] = None,
     ) -> _IdentityKeyType[Any]:
         r"""Return an identity key.

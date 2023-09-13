@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any
+from typing import Any, TypeVarTuple, Unpack
 from typing import cast
 from typing import Dict
 from typing import Iterable
@@ -46,7 +46,6 @@ from ..sql import expression
 from ..sql import roles
 from ..sql import util as sql_util
 from ..sql import visitors
-from ..sql._typing import _TP
 from ..sql._typing import is_dml
 from ..sql._typing import is_insert_update
 from ..sql._typing import is_select_base
@@ -91,6 +90,7 @@ if TYPE_CHECKING:
     from ..sql.type_api import TypeEngine
 
 _T = TypeVar("_T", bound=Any)
+_Ts = TypeVarTuple("_Ts")
 _path_registry = PathRegistry.root
 
 _EMPTY_DICT = util.immutabledict()
@@ -857,7 +857,7 @@ class ORMFromStatementCompileState(ORMCompileState):
             entity.setup_dml_returning_compile_state(self, adapter)
 
 
-class FromStatement(GroupedElement, Generative, TypedReturnsRows[_TP]):
+class FromStatement(GroupedElement, Generative, TypedReturnsRows[Unpack[_Ts]]):
     """Core construct that represents a load of ORM objects from various
     :class:`.ReturnsRows` and other classes including:
 
